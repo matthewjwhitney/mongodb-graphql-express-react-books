@@ -26,6 +26,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
+mongoose.connect('mongodb://localhost/node-graphql', { promiseLibrary: require('bluebird'), useNewUrlParser: true })
+  .then(() => console.log('connection successful'))
+  .catch((err) => console.error(err));
+
+app.use('*', cors());
+app.use('/graphql', cors(), graphqlHTTP({
+  schema: schema,
+  rootValue: global,
+  graphiql: true,
+}));
+
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
@@ -41,16 +53,5 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
-mongoose.connect('mongodb://localhost/node-graphql', { promiseLibrary: require('bluebird'), useNewUrlParser: true })
-  .then(() => console.log('connection successful'))
-  .catch((err) => console.error(err));
-
-app.use('*', cors());
-app.use('/graphql', cors(), graphqlHTTP({
-  schema: schema,
-  rootValue: global,
-  graphiql: true,
-}));
 
 module.exports = app;
